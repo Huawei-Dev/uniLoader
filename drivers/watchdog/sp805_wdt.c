@@ -17,7 +17,7 @@
 
 static int sp805_wdt_init(void *data)
 {
-	volatile unsigned int* base;
+	volatile unsigned char *base;
 
 	if (!data)
 		return -1;
@@ -27,7 +27,7 @@ static int sp805_wdt_init(void *data)
 	return 0;
 #endif
 
-	base = (volatile unsigned int *)data;
+	base = (volatile unsigned char *)data;
 
 	volatile unsigned int *wdt_control =
 		(volatile unsigned int *)(base + SP805_WDTCONTROL);
