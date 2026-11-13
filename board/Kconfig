@@ -64,6 +64,13 @@ menu "Device Support"
 		help
 		  Say Y if you want to include support for Huawei Y3 II 4G
 
+	config HUAWEI_EVEREST
+		bool "Support for Huawei Mate 20 X (Everest)"
+		default n
+		depends on KIRIN980
+		help
+		  Say Y if you want to include support for Huawei Mate 20 X (Everest)
+
 	config HTC_v36BML
 		bool "Support for HTC Desire 628 Dual"
 		default n

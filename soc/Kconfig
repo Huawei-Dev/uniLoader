@@ -141,6 +141,12 @@ config SONY
 		help
 		  Say Y if your device uses HiSilicon Hi6250
 
+	config KIRIN980
+		bool "Support for HiSilicon Kirin 980"
+		select HISILICON
+		help
+		  Say Y if your device uses HiSilicon Kirin 980 SoC
+
 	config MT6735
 		bool "Support for Mediatek MT6735"
 		select MEDIATEK

@@ -406,7 +406,11 @@ uniloader-libs := $(patsubst %,%/lib.a, $(uniloader-lib-dirs))
 uniloader-all := $(uniloader-objs) $(uniloader-libs)
 
 # Linker script dependencies
+ifeq ($(CONFIG_HUAWEI_EVEREST),y)
+linker-script-deps := $(KERNEL_PATH) $(DT_PATH)
+else
 linker-script-deps := $(KERNEL_PATH) $(RAMDISK_PATH)
+endif
 
 # ===========================================================================
 # Build targets
@@ -425,7 +429,11 @@ quiet_cmd_cpp_lds = LDS     $@
                             -P -o $@
 
 ifdef CONFIG_RAMDISK_NO_COPY
+ifeq ($(CONFIG_HUAWEI_EVEREST),y)
+	  cmd_cpp_lds += -DRAMDISK_SIZE=0
+else
 	  cmd_cpp_lds += -DRAMDISK_SIZE=$(shell stat -c%s $(RAMDISK_PATH))
+endif
 endif
 
 arch/$(ARCH)/linker.lds: arch/$(ARCH)/linker.lds.S $(linker-script-deps) FORCE

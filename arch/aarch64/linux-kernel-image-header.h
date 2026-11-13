@@ -32,7 +32,11 @@
 	 */
 	b	\entry
 	.long	0				/* reserved */
-	.quad	0				/* text_offset */
+#ifdef CONFIG_HUAWEI_EVEREST
+	.quad	0x00080000		/* text_offset: Everest */
+#else
+	.quad	0			/* text_offset */
+#endif
 	.quad	_kernel_size			/* image_size, see linker script */
 	.quad	LINUX_IMAGE_FLAGS		/* flags */
 	.quad	0				/* reserved */
