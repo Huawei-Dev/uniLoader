@@ -8,6 +8,7 @@
 #include <util.h>
 #include <drivers/framework.h>
 #include <lib/simplefb.h>
+#include <string.h>
 
 /*
  * ARM SP805 watchdog.
@@ -20,6 +21,39 @@
  * Resolution: 1080 x 2244, ARGB8888.
  */
 #define EVEREST_FB_BASE   0x36500000UL
+
+/*
+ * Enable LDI frame updates disabled by Huawei firmware.
+ *
+ * Clear bit 0: allow frame updates.
+ * Set bit 0:   enable LDI.
+ */
+#define EVEREST_DSS_BASE          0xE8600000UL
+#define EVEREST_DSS_LDI0_OFFSET   0x7D000UL
+
+#define EVEREST_LDI_CTRL \
+	(EVEREST_DSS_BASE + EVEREST_DSS_LDI0_OFFSET + 0x0024UL)
+
+#define EVEREST_LDI_FRM_MSK \
+	(EVEREST_DSS_BASE + EVEREST_DSS_LDI0_OFFSET + 0x0044UL)
+
+static int everest_early_init(void)
+{
+	/*
+	 * Restore LDI frame updates disabled by Huawei firmware
+	 * before handing control to the kernel.
+	 *
+	 * Clear bit 0: allow frame updates.
+	 * Set bit 0:   enable LDI.
+	 */
+	writel(readl((volatile uint32_t *)EVEREST_LDI_FRM_MSK) & ~1U,
+	       (void *)EVEREST_LDI_FRM_MSK);
+
+	writel(readl((volatile uint32_t *)EVEREST_LDI_CTRL) | 1U,
+	       (void *)EVEREST_LDI_CTRL);
+
+	return 0;
+}
 
 static struct video_info everest_fb = {
 	.format  = FB_FORMAT_ARGB8888,
@@ -37,6 +71,9 @@ static const struct device everest_devices[] = {
 
 struct board_data board_ops = {
 	.name = "huawei-everest",
+	.ops = {
+		.early_init = everest_early_init,
+	},
 	.devices = everest_devices,
 	.num_devices = ARRAY_SIZE(everest_devices),
 	.quirks = 0,
