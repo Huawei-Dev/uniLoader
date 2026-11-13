@@ -90,10 +90,22 @@ SECTIONS
 	ramdisk_size = SIZEOF(.ramdisk);
 #endif
 #ifdef CONFIG_POSITION_INDEPENDENT
-	_reloc_size = _reloc_end - _reloc_start;
+	/*
+	 * reloc.S copies from _start, not from _reloc_start.
+	 * Exclude the 0x80-byte ARM64 image header.
+	 */
+	_reloc_size = _reloc_end - _start;
 #endif
+
 #ifdef CONFIG_LINUX_KRNL_HEADER_IMG
+#ifdef CONFIG_POSITION_INDEPENDENT
+	/*
+	 * ARM64 image_size includes the image header.
+	 */
+	_kernel_size = _stack_end - _reloc_start;
+#else
 	_kernel_size = _stack_end - _start;
+#endif
 #endif
 
 	/* size optimization for flat binaries */
