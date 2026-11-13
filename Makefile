@@ -453,7 +453,11 @@ quiet_cmd_uniloader_objcopy = OBJCOPY $@
       cmd_uniloader_objcopy = $(OBJCOPY) -O binary $@.o $@
 
 quiet_cmd_gzip_uniloader = GZIP    $@.gz
+ifeq ($(CONFIG_HUAWEI_EVEREST),y)
+      cmd_gzip_uniloader = gzip -n -9 -c uniLoader > uniLoader.gz
+else
       cmd_gzip_uniloader = gzip -c uniLoader > uniLoader.gz
+endif
 
 quiet_cmd_lz4_uniloader = LZ4     $@.lz4
       cmd_lz4_uniloader = lz4 uniLoader -l -f -q
