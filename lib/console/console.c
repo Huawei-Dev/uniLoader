@@ -93,7 +93,28 @@ void printk(int log_level, const char *fmt, ...)
 	va_end(args);
 
 	const char *prefix = log_prefix(log_level);
+	const char *message = print_buffer;
+
+	/* Everest-only status lines use two spaces between the status and
+	 * the description.  Split them IN PLACE in printk's existing static
+	 * buffer, so framebuffer colors only "[EVR-L29:XX] OK/FAIL/SKIP ".
+	 * No additional formatter or stack buffer is used in the boot path.
+	 * All generic printk() messages retain their original behavior.
+	 */
+	if (!strncmp(print_buffer, "[EVR-L29:", sizeof("[EVR-L29:") - 1)) {
+		char *p = print_buffer;
+
+		while (*p && *p != '\n') {
+			if (p[0] == ' ' && p[1] == ' ') {
+				p[1] = '\0';
+				prefix = print_buffer;
+				message = p + 2;
+				break;
+			}
+			p++;
+		}
+	}
 
 	for (unsigned int i = 0; i < n_consoles; i++)
-		consoles[i]->write(log_level, prefix, print_buffer);
+		consoles[i]->write(log_level, prefix, message);
 }

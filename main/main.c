@@ -9,6 +9,13 @@
 #include <main/boot.h>
 #include <main/main.h>
 #include <lib/debug.h>
+#include <stdint.h>
+#ifdef CONFIG_HUAWEI_EVEREST
+#include <main/everest-fdt.h>
+#ifndef CONFIG_LIBFDT
+#error "Everest FDT adaptation requires CONFIG_LIBFDT=y"
+#endif
+#endif
 
 extern struct board_data board_ops;
 
@@ -25,7 +32,7 @@ static void print_splash(void)
 	printk(KERN_INFO, "welcome to uniLoader %s on %s\n", VER_TAG, board_ops.name);
 }
 
-void main(void* dt, void* kernel, void* ramdisk)
+void main(void* dt, void* kernel, void* ramdisk, const void* bootloader_fdt)
 {
 	early_console_init();
 	INITCALL(board_ops.ops.early_init);
@@ -36,6 +43,20 @@ void main(void* dt, void* kernel, void* ramdisk)
 
 	INITCALL(board_ops.ops.late_init);
 
+
+#ifdef CONFIG_HUAWEI_EVEREST
+	/* Normal production path: adapted candidate is used for boot. */
+	if (everest_patch_dtb(&dt, bootloader_fdt)) {
+		printk(KERN_EMERG, "Everest: FDT adaptation failed; refusing to boot\n");
+		HANG();
+	}
+#else
+	(void)bootloader_fdt;
+#endif
+
+#ifdef CONFIG_HUAWEI_EVEREST
+	printk(KERN_NOTICE, "[EVR-L29:05] OK  Handing off to kernel\n");
+#endif
 	boot_kernel(dt, kernel, ramdisk);
 
 	// todo: reset the board?

@@ -23,6 +23,10 @@ _stack_size:
 .align 4
 #endif
 ENTRY(_start)
+#ifdef CONFIG_HUAWEI_EVEREST
+	/* Huawei firmware FDT address is passed in x0. */
+	mov     x19, x0
+#endif
 	/* Set up the base address for the stack */
 	adrp    x0, _stack_end      /* Load page of the _stack_end symbol */
 	add     x0, x0, #:lo12:_stack_end  /* Add the offset within the page */
@@ -58,6 +62,12 @@ ENTRY(_start)
 	add     x2, x2, #:lo12:ramdisk /* Add offset within the page */
 #endif
 
+#ifdef CONFIG_HUAWEI_EVEREST
+	/* Fourth C argument: original firmware FDT pointer. */
+	mov     x3, x19
+#else
+	mov     x3, xzr
+#endif
 	bl main
 END(_start)
 
